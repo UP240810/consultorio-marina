@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   }
 
   const admin = getSupabaseAdminClient();
-  const repo = new SupabaseAppointmentRepository(admin);
+  const repo = new SupabaseAppointmentRepository(admin as any);
   const notifier = new NotificationService(new EmailChannel());
 
   const now = new Date();

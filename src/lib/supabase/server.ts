@@ -1,28 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 /**
  * Cliente por request, atado a las cookies de sesión de la psicóloga
  * autenticada. Respeta Row Level Security: solo ve sus propios datos.
  */
-export function getSupabaseServerClient(): SupabaseClient<any> {
+export function getSupabaseServerClient() {
   const cookieStore = cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-        set: (name: string, value: string, options: any) => {
+        get: (name) => cookieStore.get(name)?.value,
+        set: (name, value, options) => {
           cookieStore.set({ name, value, ...options });
         },
-        remove: (name: string, options: any) => {
+        remove: (name, options) => {
           cookieStore.set({ name, value: "", ...options });
         },
       },
     }
-  ) as SupabaseClient<any>;
+  );
 }
 
 /**
@@ -31,9 +31,9 @@ export function getSupabaseServerClient(): SupabaseClient<any> {
  * cita por token público, guardar encuesta post-sesión, cron de
  * recordatorios). Nunca se importa en código de cliente.
  */
-let adminClient: SupabaseClient<any> | null = null;
+let adminClient: ReturnType<typeof createClient> | null = null;
 
-export function getSupabaseAdminClient(): SupabaseClient<any> {
+export function getSupabaseAdminClient() {
   if (!adminClient) {
     adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

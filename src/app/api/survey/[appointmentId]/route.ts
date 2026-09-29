@@ -6,7 +6,7 @@ import type { SessionSurvey } from "@/types";
 
 export async function POST(request: Request, { params }: { params: { appointmentId: string } }) {
   const admin = getSupabaseAdminClient();
-  const apptRepo = new SupabaseAppointmentRepository(admin);
+  const apptRepo = new SupabaseAppointmentRepository(admin as any);
 
   const appointment = await apptRepo.findByToken(params.appointmentId);
   if (!appointment) {

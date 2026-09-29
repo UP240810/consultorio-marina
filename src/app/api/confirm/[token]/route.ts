@@ -10,7 +10,7 @@ import { SupabaseAppointmentRepository } from "@/lib/repositories/AppointmentRep
  */
 export async function POST(_request: Request, { params }: { params: { token: string } }) {
   const admin = getSupabaseAdminClient();
-  const repo = new SupabaseAppointmentRepository(admin);
+  const repo = new SupabaseAppointmentRepository(admin as any);
 
   try {
     const appointment = await repo.confirmByToken(params.token);
