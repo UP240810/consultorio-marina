@@ -1,6 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Patient } from "@/types";
 
+/**
+ * Patrón Repository: separa la lógica de acceso a datos (Supabase) del
+ * resto de la aplicación. Los componentes y rutas API dependen de esta
+ * interfaz, no de detalles de la base de datos.
+ */
 export interface IPatientRepository {
   findAll(): Promise<Patient[]>;
   findById(id: string): Promise<Patient | null>;
@@ -9,7 +14,7 @@ export interface IPatientRepository {
 }
 
 export class SupabasePatientRepository implements IPatientRepository {
-  constructor(private readonly db: SupabaseClient<any>) {}
+  constructor(private readonly db: SupabaseClient) {}
 
   async findAll(): Promise<Patient[]> {
     const { data, error } = await this.db

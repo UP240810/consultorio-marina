@@ -1,16 +1,20 @@
 import type { Appointment } from "@/types";
 
 export const CLINIC_OPEN_HOUR = 8;
-export const CLINIC_CLOSE_HOUR = 20; 
+export const CLINIC_CLOSE_HOUR = 20; // 8:00 p.m.
 export const SLOT_MINUTES = 50;
 
 export interface DaySlot {
-  time: string; 
-  iso: string; 
+  time: string; // "HH:mm"
+  iso: string; // ISO completo para ese slot en la fecha dada
   taken: boolean;
   appointment?: Appointment;
 }
 
+/**
+ * Genera los horarios disponibles de un día (de 8:00 a 20:00, cada
+ * SLOT_MINUTES) y marca cuáles ya tienen cita agendada.
+ */
 export function buildDaySlots(dateISO: string, appointments: Appointment[]): DaySlot[] {
   const slots: DaySlot[] = [];
   const takenByTime = new Map<string, Appointment>();

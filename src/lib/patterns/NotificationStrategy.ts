@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 
+/** Patrón Strategy: interfaz común para cualquier canal de notificación. */
 export interface NotificationChannel {
   send(to: string, subject: string, message: string): Promise<void>;
 }
@@ -20,6 +21,11 @@ export class EmailChannel implements NotificationChannel {
   }
 }
 
+/**
+ * Implementación de referencia para un canal futuro (WhatsApp/SMS vía
+ * Twilio, Meta Cloud API, etc.). Se deja lista para conectar sin tocar el
+ * resto del sistema: basta con implementar `send`.
+ */
 export class WhatsAppChannel implements NotificationChannel {
   async send(to: string, _subject: string, message: string): Promise<void> {
     console.warn(

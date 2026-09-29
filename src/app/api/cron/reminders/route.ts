@@ -3,6 +3,11 @@ import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import { SupabaseAppointmentRepository } from "@/lib/repositories/AppointmentRepository";
 import { NotificationService, EmailChannel } from "@/lib/patterns/NotificationStrategy";
 
+/**
+ * Se ejecuta una vez al día (ver vercel.json -> crons) y envía a cada
+ * paciente con cita ese día un enlace de confirmación. Vercel llama esta
+ * ruta con el header Authorization: Bearer <CRON_SECRET>.
+ */
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -10,7 +15,7 @@ export async function GET(request: Request) {
   }
 
   const admin = getSupabaseAdminClient();
-  const repo = new SupabaseAppointmentRepository(admin);
+  const repo = new SupabaseAppointmentRepository(admin as any);
   const notifier = new NotificationService(new EmailChannel());
 
   const now = new Date();
@@ -31,8 +36,8 @@ export async function GET(request: Request) {
     });
 
     try {
-      
-      
+      // El paciente no tiene correo en el esquema base (solo teléfono); si
+      // se agrega un campo `email` a `patients`, se usa aquí directamente.
       const to = (patient as any).email;
       if (!to) {
         results.push({

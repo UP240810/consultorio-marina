@@ -1,6 +1,14 @@
+-- =====================================================================
+-- Consultorio Marina Velázquez Tristán · esquema de base de datos
+-- Motor: PostgreSQL (Supabase)
+-- Ver diagrams/database-diagram.puml para el diagrama entidad-relación
+-- =====================================================================
 
 create extension if not exists "pgcrypto";
 
+-- ---------------------------------------------------------------------
+-- profiles: extiende auth.users para la(s) psicóloga(s) con acceso
+-- ---------------------------------------------------------------------
 create table if not exists profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text not null default 'Marina Velázquez Tristán',
@@ -10,6 +18,9 @@ create table if not exists profiles (
   created_at timestamptz not null default now()
 );
 
+-- ---------------------------------------------------------------------
+-- patients
+-- ---------------------------------------------------------------------
 create table if not exists patients (
   id uuid primary key default gen_random_uuid(),
   doctor_id uuid not null references auth.users (id) default auth.uid(),
@@ -29,6 +40,9 @@ create table if not exists patients (
 
 create index if not exists idx_patients_doctor on patients (doctor_id);
 
+-- ---------------------------------------------------------------------
+-- appointments
+-- ---------------------------------------------------------------------
 create table if not exists appointments (
   id uuid primary key default gen_random_uuid(),
   doctor_id uuid not null references auth.users (id) default auth.uid(),
@@ -53,6 +67,9 @@ create index if not exists idx_appointments_patient on appointments (patient_id)
 create index if not exists idx_appointments_date on appointments (scheduled_at);
 create unique index if not exists idx_appointments_token on appointments (confirm_token);
 
+-- ---------------------------------------------------------------------
+-- session_notes: notas clínicas de cada sesión
+-- ---------------------------------------------------------------------
 create table if not exists session_notes (
   id uuid primary key default gen_random_uuid(),
   appointment_id uuid references appointments (id) on delete set null,
@@ -64,6 +81,9 @@ create table if not exists session_notes (
 
 create index if not exists idx_notes_patient on session_notes (patient_id);
 
+-- ---------------------------------------------------------------------
+-- session_surveys: encuesta breve al terminar cada cita
+-- ---------------------------------------------------------------------
 create table if not exists session_surveys (
   id uuid primary key default gen_random_uuid(),
   appointment_id uuid not null references appointments (id) on delete cascade,
@@ -80,6 +100,9 @@ create table if not exists session_surveys (
 create index if not exists idx_surveys_patient on session_surveys (patient_id);
 create index if not exists idx_surveys_risk on session_surveys (risk_factor) where risk_factor = true;
 
+-- ---------------------------------------------------------------------
+-- finance_entries: ingresos y gastos del consultorio
+-- ---------------------------------------------------------------------
 create table if not exists finance_entries (
   id uuid primary key default gen_random_uuid(),
   doctor_id uuid not null references auth.users (id) default auth.uid(),
@@ -93,6 +116,9 @@ create table if not exists finance_entries (
 
 create index if not exists idx_finance_doctor_date on finance_entries (doctor_id, entry_date);
 
+-- ---------------------------------------------------------------------
+-- issued_documents: PDFs generados (justificantes, constancias, permisos)
+-- ---------------------------------------------------------------------
 create table if not exists issued_documents (
   id uuid primary key default gen_random_uuid(),
   doctor_id uuid not null references auth.users (id) default auth.uid(),
@@ -109,6 +135,9 @@ create table if not exists issued_documents (
 
 create index if not exists idx_documents_patient on issued_documents (patient_id);
 
+-- ---------------------------------------------------------------------
+-- reminder_logs: bitácora de recordatorios enviados por el cron diario
+-- ---------------------------------------------------------------------
 create table if not exists reminder_logs (
   id uuid primary key default gen_random_uuid(),
   appointment_id uuid not null references appointments (id) on delete cascade,
@@ -118,6 +147,9 @@ create table if not exists reminder_logs (
   sent_at timestamptz not null default now()
 );
 
+-- =====================================================================
+-- Row Level Security: cada psicóloga solo ve sus propios datos
+-- =====================================================================
 alter table profiles enable row level security;
 alter table patients enable row level security;
 alter table appointments enable row level security;
@@ -158,3 +190,9 @@ create policy "reminder_logs: solo via appointment de la doctora" on reminder_lo
     )
   );
 
+-- Nota: las rutas públicas de confirmación de cita (/confirmar/[token]) y de
+-- encuesta post-sesión (/encuesta/[appointmentId]) NO usan el cliente anónimo
+-- de Supabase contra estas tablas; pasan siempre por API routes del servidor
+-- que usan la Service Role Key, validan el token/UUID y solo exponen los
+-- campos estrictamente necesarios. Así el paciente nunca necesita una cuenta
+-- ni RLS pública, y la base de datos permanece cerrada por defecto.

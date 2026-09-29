@@ -30,7 +30,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
          <p><a href="${surveyUrl}">Responder encuesta breve (2 minutos)</a></p>`
       );
     } catch {
-      
+      // El envío del correo no debe bloquear el cierre de la cita.
     }
   }
 

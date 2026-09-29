@@ -18,7 +18,7 @@ export interface IAppointmentRepository {
 }
 
 export class SupabaseAppointmentRepository implements IAppointmentRepository {
-  constructor(private readonly db: SupabaseClient<any>) {}
+  constructor(private readonly db: SupabaseClient) {}
 
   async findByDateRange(from: string, to: string): Promise<Appointment[]> {
     const { data, error } = await this.db
@@ -82,7 +82,7 @@ export class SupabaseAppointmentRepository implements IAppointmentRepository {
     return data as Appointment;
   }
 
-  
+  /** Usada por la ruta pública /api/confirm/[token] con el cliente admin. */
   async confirmByToken(token: string): Promise<Appointment> {
     const { data, error } = await this.db
       .from("appointments")
@@ -94,7 +94,7 @@ export class SupabaseAppointmentRepository implements IAppointmentRepository {
     return data as Appointment;
   }
 
-  
+  /** Citas del día que aún no tienen recordatorio enviado (para el cron). */
   async findPendingReminders(dayStart: string, dayEnd: string): Promise<Appointment[]> {
     const { data, error } = await this.db
       .from("appointments")

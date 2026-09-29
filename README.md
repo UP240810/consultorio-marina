@@ -1,226 +1,208 @@
-# Consultorio Marina 
+# Consultorio Marina Velázquez Tristán
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-  <img src="https://img.shields.io/badge/POO-Patrones%20GoF-6D28D9?style=for-the-badge" alt="POO" />
-  <img src="https://img.shields.io/badge/PlantUML-Diagramas-blueviolet?style=for-the-badge" alt="PlantUML" />
-</p>
+Sistema de gestión para un consultorio de psicología, construido como
+aplicación web completa conectada a una base de datos real, siguiendo los
+fundamentos de la Programación Orientada a Objetos y documentado con
+diagramas UML en formato `.puml`.
 
-Aplicación web funcional de gestión integral para un consultorio de psicología.  
-Agenda, expedientes, notas clínicas, encuestas post-sesión, finanzas, recordatorios automáticos y generación de PDFs profesionales.
-
-Construida con Next.js 14 + TypeScript, conectada a PostgreSQL (Supabase) y desplegada en Vercel.  
-Todo el código, la documentación, los diagramas y el historial viven en este repositorio de GitHub.
+Stack: **Next.js 14 (TypeScript) + Supabase (PostgreSQL) + Vercel**.
 
 ---
 
-## Vista previa del sistema
+## Índice
 
-| Login | Panel principal |
-|:-----:|:---------------:|
-| ![Login](docs/images/screenshot-login.png) | ![Dashboard](docs/images/screenshot-dashboard.png) |
-
-| Agenda | Expediente de paciente |
-|:------:|:----------------------:|
-| ![Agenda](docs/images/screenshot-agenda.png) | ![Paciente](docs/images/screenshot-paciente.png) |
-
-> Capturas ilustrativas del flujo principal (tema morado armonioso usado en toda la interfaz).
+1. [Qué es la aplicación](#1-qué-es-la-aplicación)
+2. [Por qué está construida bajo Programación Orientada a Objetos](#2-por-qué-está-construida-bajo-programación-orientada-a-objetos)
+3. [Base de datos: cuál se usa y cómo se conecta la aplicación](#3-base-de-datos-cuál-se-usa-y-cómo-se-conecta-la-aplicación)
+4. [Diagramas UML (.puml)](#4-diagramas-uml-puml)
+5. [Funcionalidad: qué hace la aplicación de principio a fin](#5-funcionalidad-qué-hace-la-aplicación-de-principio-a-fin)
+6. [Puesta en marcha](#6-puesta-en-marcha)
+7. [Estructura del repositorio](#7-estructura-del-repositorio)
 
 ---
 
-## ¿De qué trata la aplicación?
+## 1. Qué es la aplicación
 
-Es un organizador completo orientado a la práctica clínica de una psicóloga. Desde un único panel protegido se gestionan:
+Es el sistema de administración diaria del consultorio de la Psic. Marina
+Velázquez Tristán (Psicología Cognitivo-Conductual y Terapia Gestalt). Antes
+de este sistema, la agenda, los expedientes y los documentos que se emiten
+(justificantes, constancias, permisos escolares) se llevaban por separado y
+a mano; la aplicación los unifica en un solo lugar con datos reales
+persistidos en una base de datos, no en memoria ni en archivos sueltos.
 
-| Módulo | Funcionalidad |
-|--------|---------------|
-| **Pacientes** | Alta, edición y ficha con datos personales, contacto de emergencia, medicación y estatus |
-| **Agenda** | Horario fijo 8:00–20:00, franjas de 50 min, navegable por día |
-| **Citas** | Creación, confirmación por enlace único, finalización y envío de encuesta |
-| **Notas de sesión** | Historial clínico cronológico por paciente |
-| **Encuesta post-sesión** | Estado de ánimo, escala de alta (1-10) y detección de factor de riesgo |
-| **Finanzas** | Ingresos, gastos, balance mensual y gráfica de 6 meses |
-| **Documentos PDF** | Justificante, constancia y permiso escolar con membrete profesional (Ψ) |
-| **Recordatorios** | Cron diario que envía correo con enlace de confirmación |
+Concretamente, resuelve cuatro necesidades del consultorio:
 
-La aplicación es funcional de extremo a extremo: autenticación real, CRUD persistente, lógica de negocio, notificaciones y generación de archivos.
+- **Agenda clínica**: horario fijo de 8:00 a.m. a 8:00 p.m. en franjas de 50
+  minutos, con las citas realmente guardadas en base de datos y consultables
+  por día.
+- **Expediente de paciente**: datos personales, contacto de emergencia,
+  medicación actual y una bitácora de notas de sesión por paciente.
+- **Ciclo de vida de una consulta**: se agenda, se envía un recordatorio con
+  enlace de confirmación, se atiende, se marca como finalizada y se envía
+  una encuesta post-sesión (con una pregunta explícita de factor de riesgo
+  para el contacto de emergencia).
+- **Emisión de documentos**: generación de PDFs (justificante, constancia,
+  permiso escolar) a partir de un formulario, con el membrete y las cédulas
+  profesionales reales de la psicóloga.
 
----
+## 2. Por qué está construida bajo Programación Orientada a Objetos
 
-## Base de datos
+El proyecto no es un CRUD suelto de páginas hablando directo con la base de
+datos: está organizado en **clases con responsabilidad única**, que se
+comunican mediante **interfaces** (abstracción y polimorfismo) en vez de
+depender unas de otras directamente. Esa organización es, en sí misma, la
+base de Programación Orientada a Objetos que pide el proyecto, y se ve en
+tres niveles:
 
-### Motor
+**a) El modelo de dominio.** Las entidades reales del consultorio —
+`Patient`, `Appointment`, `SessionNote`, `SessionSurvey`, `FinanceEntry`,
+`IssuedDocument` — están definidas como tipos/clases de dominio con sus
+propios atributos y reglas (ver `diagrams/class-diagram.puml`), no como
+filas de tabla sueltas manipuladas donde sea.
 
-**PostgreSQL gestionado por Supabase. Aporta:**
+**b) Encapsulamiento del acceso a datos (patrón Repository).** Ninguna
+página le pregunta directamente a la base de datos. `SupabasePatientRepository`
+y `SupabaseAppointmentRepository` son las únicas clases que saben que la
+base de datos es Supabase; el resto del sistema solo conoce la interfaz
+(`IPatientRepository`, `IAppointmentRepository`). Esto es encapsulamiento:
+el "cómo se guarda" queda oculto detrás del "qué se puede hacer".
 
-- Base de datos relacional con integridad referencial
-- Supabase Auth para login de la psicóloga
-- Row Level Security (RLS) → cada profesional solo ve sus propios datos
-- Cliente JavaScript oficial listo para Next.js
+**c) Polimorfismo mediante interfaces (patrones Strategy, Factory Method,
+Observer).** Tres problemas del consultorio se resolvieron dejando que una
+interfaz común tenga varias implementaciones intercambiables, en vez de un
+`if/else` gigante repetido:
 
-El esquema completo está en [`db/schema.sql`](db/schema.sql) (tablas, índices, constraints de horario laboral y políticas RLS).  
-Datos de prueba: [`db/seed.sql`](db/seed.sql).
+| Patrón | Interfaz | Implementaciones concretas | Problema real que resuelve |
+|---|---|---|---|
+| **Singleton** | — | `getSupabaseBrowserClient()`, `getSupabaseAdminClient()` | Una sola instancia del cliente de base de datos, en vez de recrearlo en cada archivo. |
+| **Repository** | `IPatientRepository`, `IAppointmentRepository` | `SupabasePatientRepository`, `SupabaseAppointmentRepository` | El resto de la app nunca depende de cómo está guardada la información. |
+| **Factory Method** | `DocumentTemplate` (construcción) | Justificante / Constancia / Permiso escolar | Los tres PDFs comparten membrete y firma; solo cambia el cuerpo según el tipo. |
+| **Strategy** | `NotificationChannel` | `EmailChannel`, `WhatsAppChannel` | El recordatorio diario y la alerta de riesgo notifican sin saber por qué canal. |
+| **Observer** | `SurveyObserver` | `RiskAlertObserver`, `StatisticsObserver` | Guardar una encuesta puede disparar varias reacciones independientes (alerta de riesgo, estadísticas) sin acoplarlas al formulario. |
 
-### Diagrama entidad-relación
+Cada uno de estos cinco patrones está documentado a detalle —intención,
+problema, solución y consecuencias, con el código real del proyecto— en
+[`docs/patrones-de-diseno.md`](docs/patrones-de-diseno.md), incluyendo el
+mapa de "code smells" que cada patrón resuelve (referencia:
+[refactoring.guru/es/design-patterns](https://refactoring.guru/es/design-patterns)).
+El diagrama completo de estas relaciones está en
+[`diagrams/patterns-diagram.puml`](diagrams/patterns-diagram.puml).
 
-![Diagrama de base de datos](diagrams/database-diagram.png)
+## 3. Base de datos: cuál se usa y cómo se conecta la aplicación
 
-> Fuente editable: [`diagrams/database-diagram.puml`](diagrams/database-diagram.puml)
+**Motor:** PostgreSQL, administrado a través de **Supabase** (Backend-as-a-
+-Service sobre Postgres que además provee autenticación y seguridad a nivel
+de fila). Se eligió porque da, en un mismo proyecto, la base de datos
+relacional, el login de la psicóloga y las políticas de seguridad, sin
+necesidad de un servidor propio.
 
-### Cómo se conecta la aplicación
+**Cómo se conecta la aplicación:**
 
-La conexión se realiza con el cliente oficial `@supabase/supabase-js` + `@supabase/ssr`, encapsulado con el patrón **Singleton**:
+1. El esquema completo (tablas, llaves foráneas, restricciones e índices)
+   vive en [`db/schema.sql`](db/schema.sql) y se ejecuta una sola vez desde
+   el SQL Editor de Supabase para crear la base de datos.
+2. La aplicación nunca usa una contraseña de base de datos directamente:
+   se conecta con las librerías oficiales `@supabase/supabase-js` y
+   `@supabase/ssr`, autenticadas con dos llaves distintas según el
+   contexto:
+   - **Llave pública (`anon key`)**: usada por el navegador y por las
+     páginas del panel de la psicóloga, sujeta a **Row Level Security**
+     (cada fila de `patients`, `appointments`, etc. solo es visible para
+     el `doctor_id` que le corresponde — ver las políticas al final de
+     `db/schema.sql`).
+   - **Llave de servicio (`service_role key`)**: usada solo por rutas de
+     servidor sin sesión de usuario (confirmar cita por token, responder
+     la encuesta, el cron de recordatorios), porque ahí no hay una
+     psicóloga autenticada, pero la ruta valida un token UUID
+     impredecible antes de tocar cualquier fila.
+3. Ambas conexiones están centralizadas con el patrón Singleton en
+   `src/lib/supabase/client.ts` (navegador) y `src/lib/supabase/server.ts`
+   (servidor), así que ningún otro archivo abre su propia conexión.
+4. Las variables `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   y `SUPABASE_SERVICE_ROLE_KEY` (ver `.env.example`) son lo único que hay
+   que configurar para apuntar la aplicación a un proyecto de Supabase
+   distinto — no hay cadenas de conexión ni SQL crudo dentro del código de
+   la aplicación, todo pasa por los repositorios.
 
-| Cliente | Archivo | Responsabilidad |
-|---------|---------|-----------------|
-| Navegador | `src/lib/supabase/client.ts` | Operaciones del frontend con la sesión del usuario |
-| Servidor (admin) | `src/lib/supabase/server.ts` | Rutas API y cron que requieren Service Role Key |
+## 4. Diagramas UML (.puml)
 
-```ts
-// Ejemplo del Singleton (browser)
-let browserClient: ReturnType<typeof createBrowserClient> | null = null;
+Los tres diagramas requeridos están en `diagrams/`, en formato PlantUML
+(`.puml`), y se pueden abrir pegando su contenido en
+<https://www.plantuml.com/plantuml/uml/> o con la extensión "PlantUML" de
+VS Code:
 
-export function getSupabaseBrowserClient() {
-  if (!browserClient) {
-    browserClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-  }
-  return browserClient;
-}
-```
+- **`class-diagram.puml`** — Diagrama de clases: las entidades del dominio
+  (`Doctor`, `Patient`, `Appointment`, `SessionNote`, `SessionSurvey`,
+  `FinanceEntry`, `IssuedDocument`), sus atributos, sus enumeraciones de
+  estado, y los servicios de aplicación (`AppointmentScheduler`,
+  `SurveyService`, `DocumentGenerator`, `NotificationService`,
+  `StatisticsService`) con sus relaciones.
+- **`database-diagram.puml`** — Diagrama entidad-relación de las tablas
+  reales creadas en Supabase (`patients`, `appointments`, `session_notes`,
+  `session_surveys`, `finance_entries`, `issued_documents`,
+  `reminder_logs`) y sus llaves foráneas hacia `auth.users`.
+- **`patterns-diagram.puml`** — Diagrama de los 5 patrones de diseño
+  aplicados (Singleton, Repository, Factory Method, Strategy, Observer):
+  cada interfaz, sus implementaciones concretas, y en qué archivo vive
+  cada una.
 
-El acceso a datos de dominio nunca se hace con `supabase.from(...)` desde páginas o componentes.  
-Se abstrae con el patrón Repository (`src/lib/repositories/`), de modo que el resto del código trabaja solo con interfaces de dominio:
+## 5. Funcionalidad: qué hace la aplicación de principio a fin
 
-```ts
-export interface IPatientRepository {
-  findAll(): Promise<Patient[]>;
-  findById(id: string): Promise<Patient | null>;
-  create(data: Omit<Patient, "id" | "doctor_id" | "created_at" | "updated_at">): Promise<Patient>;
-  update(id: string, data: Partial<Patient>): Promise<Patient>;
-}
-```
+Para comprobar que el sistema es funcional y no solo un diseño en papel,
+este es el recorrido completo, en el orden en que ocurre en la vida real
+del consultorio:
 
-Variables de entorno (ver [`.env.example`](.env.example)):
+1. La psicóloga inicia sesión (Supabase Auth) y agenda una cita para un
+   paciente en un horario libre entre 8:00 y 20:00 — la restricción de
+   horario está reforzada tanto en la interfaz como en la base de datos
+   (`chk_business_hours` en `schema.sql`).
+2. Un proceso programado (`vercel.json` + `/api/cron/reminders`) revisa
+   diariamente las citas del día y envía por correo, a cada paciente, un
+   enlace único para confirmar su asistencia sin necesidad de cuenta.
+3. Al terminar la consulta, la psicóloga la marca como completada; el
+   sistema envía automáticamente el enlace de la encuesta post-sesión.
+4. El paciente responde la encuesta con botones simples; si señala un
+   factor de riesgo, el sistema alerta automáticamente a la psicóloga
+   (patrón Observer).
+5. La psicóloga puede, en cualquier momento, generar un PDF (justificante,
+   constancia o permiso escolar) para ese paciente, y consultar las
+   estadísticas de ingresos, gastos y citas del mes.
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...   # solo servidor, nunca en el cliente
-```
+Todo lo anterior lee y escribe contra la base de datos real descrita en la
+sección 3 — no hay datos simulados en el código de producción.
 
----
+## 6. Puesta en marcha
 
-## Relación con la Programación Orientada a Objetos
+Los pasos detallados para instalar dependencias, crear el proyecto de
+Supabase, ejecutar `db/schema.sql`, configurar las variables de entorno y
+desplegar en Vercel están documentados, paso a paso, en
+[`docs/instrucciones_ejecucion.txt`](docs/instrucciones_ejecucion.txt).
 
-Este proyecto se diseñó desde el principio aplicando los fundamentos de la POO y patrones de diseño del catálogo GoF.  
-Cada decisión responde a un problema real de mantenibilidad y extensión, no a un ejercicio de catálogo.
-
-### Principios de POO aplicados
-
-| Principio | Cómo se materializa en el código |
-|-----------|----------------------------------|
-| **Encapsulamiento** | El acceso a Supabase queda oculto detrás de repositorios. La UI y las rutas API no conocen SQL ni el cliente de base de datos. |
-| **Abstracción** | Contratos claros (`IPatientRepository`, `NotificationChannel`, `SurveyObserver`) que ocultan la implementación concreta. |
-| **Polimorfismo** | Diferentes implementaciones (canales de notificación, tipos de PDF, observadores) se tratan de forma uniforme a través de la interfaz. |
-| **Responsabilidad única** | Cada clase tiene un único motivo de cambio: repositorio de pacientes, fábrica de documentos, estrategia de notificación, etc. |
-
-### Diagrama de clases
-
-![Diagrama de clases](diagrams/class-diagram.png)
-
-> Fuente editable: [`diagrams/class-diagram.puml`](diagrams/class-diagram.puml)
-
-### Patrones de diseño implementados
-
-![Diagrama de patrones](diagrams/patterns-diagram.png)
-
-> Fuente editable: [`diagrams/patterns-diagram.puml`](diagrams/patterns-diagram.puml)
-
-| Patrón | Categoría | Ubicación | Problema concreto que resuelve |
-|--------|-----------|-----------|--------------------------------|
-| **Singleton** | Creacional | `src/lib/supabase/` | Evitar múltiples instancias del cliente de Supabase y centralizar la configuración de conexión. |
-| **Repository** | Arquitectura | `src/lib/repositories/` | Aislar el acceso a datos. Un cambio de proveedor o una nueva validación solo toca un archivo. |
-| **Factory Method** | Creacional | `src/lib/pdf/DocumentTemplateFactory.ts` | Generar el PDF correcto (justificante / constancia / permiso) reutilizando membrete y estructura. |
-| **Strategy** | Comportamiento | `src/lib/patterns/NotificationStrategy.ts` | Intercambiar canal de notificación (correo hoy; WhatsApp/SMS preparado) sin tocar quien solicita el envío. |
-| **Observer** | Comportamiento | `src/lib/patterns/SurveyObserver.ts` | Reaccionar a una encuesta enviada (alerta de riesgo, estadísticas futuras) sin acoplar esa lógica a la ruta API. |
-
-### Refactorización
-
-Cada patrón se introdujo como respuesta a un code smell real (código duplicado, switch statements repetidos, feature envy, cambios dispersos).  
-
-La documentación completa del proceso —mapa smell → patrón + ejemplo antes/después— está en:
-
-**[`docs/refactorizacion.md`](docs/refactorizacion.md)**
-
-La refactorización se realizó sin cambiar el comportamiento externo: las mismas funcionalidades siguen operando, pero el código interno es más legible, extensible y alineado con los principios de la POO.
-
----
-
-## Estructura del repositorio
-
-```
-psico-marina/
-├── db/
-│   ├── schema.sql              # Esquema PostgreSQL + RLS
-│   └── seed.sql                # Datos de prueba
-├── diagrams/
-│   ├── database-diagram.puml   # ER (fuente)
-│   ├── database-diagram.png    # ER (imagen)
-│   ├── class-diagram.puml      # Clases (fuente)
-│   ├── class-diagram.png       # Clases (imagen)
-│   ├── patterns-diagram.puml   # Patrones (fuente)
-│   └── patterns-diagram.png    # Patrones (imagen)
-├── docs/
-│   ├── refactorizacion.md      # Smells → patrones
-│   └── images/                 # Capturas del sistema
-├── src/
-│   ├── app/                    # Páginas + API Routes
-│   ├── components/             # UI
-│   ├── lib/
-│   │   ├── supabase/           # Singleton
-│   │   ├── repositories/       # Repository
-│   │   ├── patterns/           # Strategy + Observer
-│   │   ├── pdf/                # Factory Method
-│   │   └── services/           # Estadísticas
-│   └── types/
-├── vercel.json                 # Cron de recordatorios
-└── .env.example
-```
-
----
-
-## Puesta en marcha
-
-### Requisitos
-- Node.js 18+
-- Cuenta gratuita de [Supabase](https://supabase.com)
-- (Opcional) [Resend](https://resend.com) para correos
-
-### Local
+Resumen rápido para desarrollo local (con el proyecto de Supabase y las
+variables de entorno ya configuradas, ver el archivo anterior):
 
 ```bash
 npm install
-cp .env.example .env.local   # completar variables
+cp .env.example .env.local   # completar con las llaves de Supabase/Resend
 npm run dev
 ```
 
-Abrir → http://localhost:3000
+## 7. Estructura del repositorio
 
-### Producción (Vercel + Supabase)
-
-1. Ejecutar `db/schema.sql` en el SQL Editor de Supabase.  
-2. Crear el usuario de la psicóloga en Authentication.  
-3. Configurar las variables de entorno en Vercel.  
-4. Desplegar. `vercel.json` ya define el cron diario de recordatorios (14:00 UTC).
-
-
-
-- Capturas visuales del flujo principal
-- Código listo para ejecutar y desplegar
-
-El resultado es un sistema mantenible, extensible y alineado con buenas prácticas de ingeniería de software.
+```
+consultorio-marina/
+├── db/schema.sql              # Esquema de la base de datos (PostgreSQL/Supabase)
+├── diagrams/                  # class-diagram.puml, database-diagram.puml, patterns-diagram.puml
+├── docs/
+│   ├── patrones-de-diseno.md      # Documentación detallada de cada patrón (POO)
+│   └── instrucciones_ejecucion.txt # Guía paso a paso para ejecutar el proyecto
+├── src/
+│   ├── app/                   # Páginas y rutas API (Next.js App Router)
+│   ├── lib/
+│   │   ├── supabase/          # Conexión a la base de datos (Singleton)
+│   │   ├── repositories/      # Acceso a datos por entidad (Repository)
+│   │   ├── patterns/          # Strategy, Observer
+│   │   └── pdf/               # Factory Method
+│   └── types/                 # Modelo de dominio (clases/tipos)
+└── .env.example
+```

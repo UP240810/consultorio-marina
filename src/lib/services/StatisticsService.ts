@@ -9,6 +9,7 @@ export interface MonthSummary {
   appointmentsNoShow: number;
 }
 
+/** Agrupa consultas de estadísticas para no repetirlas en cada página. */
 export class StatisticsService {
   constructor(private readonly db: SupabaseClient) {}
 

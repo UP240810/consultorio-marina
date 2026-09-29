@@ -1,10 +1,16 @@
 import type { SessionSurvey, Patient } from "@/types";
 import { NotificationService, EmailChannel } from "./NotificationStrategy";
 
+/** Patrón Observer: desacopla "qué pasa cuando se envía una encuesta" del formulario. */
 export interface SurveyObserver {
   onSurveySubmitted(survey: SessionSurvey, patient: Patient): Promise<void>;
 }
 
+/**
+ * Si la encuesta marca un factor de riesgo, este observador se encarga de
+ * avisar (por ahora por correo) al contacto de emergencia y a la propia
+ * doctora, sin acoplar esa lógica a la ruta de la API de la encuesta.
+ */
 export class RiskAlertObserver implements SurveyObserver {
   private notifier = new NotificationService(new EmailChannel());
 
@@ -28,9 +34,10 @@ export class RiskAlertObserver implements SurveyObserver {
   }
 }
 
+/** Placeholder para futuras métricas agregadas (ej. tendencia de ánimo por paciente). */
 export class StatisticsObserver implements SurveyObserver {
   async onSurveySubmitted(_survey: SessionSurvey, _patient: Patient): Promise<void> {
-    
+    // Punto de extensión: recalcular tendencias, dashboards, etc.
   }
 }
 
