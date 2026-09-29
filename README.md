@@ -8,11 +8,11 @@
   <img src="https://img.shields.io/badge/PlantUML-Diagramas-blueviolet?style=for-the-badge" alt="PlantUML" />
 </p>
 
-**Aplicación web funcional** de gestión integral para un consultorio de psicología.  
+Aplicación web funcional de gestión integral para un consultorio de psicología.  
 Agenda, expedientes, notas clínicas, encuestas post-sesión, finanzas, recordatorios automáticos y generación de PDFs profesionales.
 
-Construida con **Next.js 14 + TypeScript**, conectada a **PostgreSQL (Supabase)** y desplegada en **Vercel**.  
-Todo el código, la documentación, los diagramas y el historial viven en este repositorio de **GitHub**.
+Construida con Next.js 14 + TypeScript, conectada a PostgreSQL (Supabase) y desplegada en Vercel.  
+Todo el código, la documentación, los diagramas y el historial viven en este repositorio de GitHub.
 
 ---
 
@@ -45,7 +45,7 @@ Es un organizador completo orientado a la práctica clínica de una psicóloga. 
 | **Documentos PDF** | Justificante, constancia y permiso escolar con membrete profesional (Ψ) |
 | **Recordatorios** | Cron diario que envía correo con enlace de confirmación |
 
-La aplicación es **funcional de extremo a extremo**: autenticación real, CRUD persistente, lógica de negocio, notificaciones y generación de archivos.
+La aplicación es funcional de extremo a extremo: autenticación real, CRUD persistente, lógica de negocio, notificaciones y generación de archivos.
 
 ---
 
@@ -53,11 +53,11 @@ La aplicación es **funcional de extremo a extremo**: autenticación real, CRUD 
 
 ### Motor
 
-**PostgreSQL** gestionado por **Supabase**. Aporta:
+**PostgreSQL gestionado por Supabase. Aporta:**
 
 - Base de datos relacional con integridad referencial
-- **Supabase Auth** para login de la psicóloga
-- **Row Level Security (RLS)** → cada profesional solo ve sus propios datos
+- Supabase Auth para login de la psicóloga
+- Row Level Security (RLS) → cada profesional solo ve sus propios datos
 - Cliente JavaScript oficial listo para Next.js
 
 El esquema completo está en [`db/schema.sql`](db/schema.sql) (tablas, índices, constraints de horario laboral y políticas RLS).  
@@ -93,8 +93,8 @@ export function getSupabaseBrowserClient() {
 }
 ```
 
-El acceso a datos de dominio **nunca** se hace con `supabase.from(...)` desde páginas o componentes.  
-Se abstrae con el patrón **Repository** (`src/lib/repositories/`), de modo que el resto del código trabaja solo con interfaces de dominio:
+El acceso a datos de dominio nunca se hace con `supabase.from(...)` desde páginas o componentes.  
+Se abstrae con el patrón Repository (`src/lib/repositories/`), de modo que el resto del código trabaja solo con interfaces de dominio:
 
 ```ts
 export interface IPatientRepository {
@@ -117,7 +117,7 @@ SUPABASE_SERVICE_ROLE_KEY=...   # solo servidor, nunca en el cliente
 
 ## Relación con la Programación Orientada a Objetos
 
-Este proyecto se diseñó desde el principio aplicando los **fundamentos de la POO** y patrones de diseño del catálogo GoF.  
+Este proyecto se diseñó desde el principio aplicando los fundamentos de la POO y patrones de diseño del catálogo GoF.  
 Cada decisión responde a un problema real de mantenibilidad y extensión, no a un ejercicio de catálogo.
 
 ### Principios de POO aplicados
@@ -151,13 +151,13 @@ Cada decisión responde a un problema real de mantenibilidad y extensión, no a 
 
 ### Refactorización
 
-Cada patrón se introdujo como respuesta a un *code smell* real (código duplicado, *switch statements* repetidos, *feature envy*, cambios dispersos).  
+Cada patrón se introdujo como respuesta a un code smell real (código duplicado, switch statements repetidos, feature envy, cambios dispersos).  
 
 La documentación completa del proceso —mapa smell → patrón + ejemplo antes/después— está en:
 
 **[`docs/refactorizacion.md`](docs/refactorizacion.md)**
 
-La refactorización se realizó **sin cambiar el comportamiento externo**: las mismas funcionalidades siguen operando, pero el código interno es más legible, extensible y alineado con los principios de la POO.
+La refactorización se realizó sin cambiar el comportamiento externo: las mismas funcionalidades siguen operando, pero el código interno es más legible, extensible y alineado con los principios de la POO.
 
 ---
 
@@ -214,19 +214,12 @@ Abrir → http://localhost:3000
 ### Producción (Vercel + Supabase)
 
 1. Ejecutar `db/schema.sql` en el SQL Editor de Supabase.  
-2. Crear el usuario de la psicóloga en **Authentication**.  
+2. Crear el usuario de la psicóloga en Authentication.  
 3. Configurar las variables de entorno en Vercel.  
 4. Desplegar. `vercel.json` ya define el cron diario de recordatorios (14:00 UTC).
 
----
 
-## Resumen
 
-Este repositorio entrega un **programa funcional conectado a base de datos real** (PostgreSQL / Supabase), documentado de forma profesional en GitHub, que aplica de manera práctica y justificada los fundamentos de la **Programación Orientada a Objetos** y cinco patrones de diseño.  
-
-Incluye:
-- Diagramas de base de datos, de clases y de patrones en formato **PlantUML** (`.puml` + `.png`)
-- Evidencia de **refactorización** orientada a code smells
 - Capturas visuales del flujo principal
 - Código listo para ejecutar y desplegar
 
