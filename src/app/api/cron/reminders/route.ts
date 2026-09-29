@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   }
 
   const admin = getSupabaseAdminClient();
-  const repo = new SupabaseAppointmentRepository(admin as any);
+  const repo = new SupabaseAppointmentRepository(admin);
   const notifier = new NotificationService(new EmailChannel());
 
   const now = new Date();
@@ -55,14 +55,14 @@ export async function GET(request: Request) {
          <p><a href="${confirmUrl}">Confirma tu asistencia aquí</a></p>`
       );
       await repo.markReminderSent(appt.id);
-      await (admin.from("reminder_logs") as any).insert({
+      await admin.from("reminder_logs").insert({
         appointment_id: appt.id,
         channel: "email",
         status: "enviado",
       });
       results.push({ appointment_id: appt.id, status: "enviado" });
     } catch (err: any) {
-      await (admin.from("reminder_logs") as any).insert({
+      await admin.from("reminder_logs").insert({
         appointment_id: appt.id,
         channel: "email",
         status: "fallido",

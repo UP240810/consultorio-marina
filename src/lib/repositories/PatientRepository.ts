@@ -14,7 +14,7 @@ export interface IPatientRepository {
 }
 
 export class SupabasePatientRepository implements IPatientRepository {
-  constructor(private readonly db: SupabaseClient) {}
+  constructor(private readonly db: SupabaseClient<any>) {}
 
   async findAll(): Promise<Patient[]> {
     const { data, error } = await this.db

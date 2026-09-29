@@ -18,7 +18,7 @@ export interface IAppointmentRepository {
 }
 
 export class SupabaseAppointmentRepository implements IAppointmentRepository {
-  constructor(private readonly db: SupabaseClient) {}
+  constructor(private readonly db: SupabaseClient<any>) {}
 
   async findByDateRange(from: string, to: string): Promise<Appointment[]> {
     const { data, error } = await this.db
