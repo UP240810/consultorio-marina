@@ -7,6 +7,8 @@ diagramas UML en formato `.puml`.
 
 Stack: **Next.js 14 (TypeScript) + Supabase (PostgreSQL) + Vercel**.
 
+Url real del proyecto: https://consultorio-marina-c1b52giig-goti-team.vercel.app/
+
 ---
 
 ## Índice
