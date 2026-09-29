@@ -105,7 +105,6 @@ export default function LoginPage() {
   );
 }
 
-/** Marca de agua discreta con el símbolo Ψ, para que el panel no sea un bloque de color plano. */
 function PsiWatermark() {
   return (
     <svg

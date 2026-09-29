@@ -6,7 +6,7 @@ import type { SessionSurvey } from "@/types";
 
 export async function POST(request: Request, { params }: { params: { appointmentId: string } }) {
   const admin = getSupabaseAdminClient();
-  const apptRepo = new SupabaseAppointmentRepository(admin as any);
+  const apptRepo = new SupabaseAppointmentRepository(admin);
 
   const appointment = await apptRepo.findByToken(params.appointmentId);
   if (!appointment) {
@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: { appointment
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Patrón Observer: si hay riesgo, se notifica sin acoplar esa lógica aquí.
+  
   const service = new SurveyService();
   service.subscribe(new RiskAlertObserver());
   service.subscribe(new StatisticsObserver());

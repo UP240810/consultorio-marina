@@ -9,12 +9,6 @@ interface StatItem {
   highlight?: "ok" | "risk";
 }
 
-/**
- * A propósito NO es una fila de 4 tarjetas idénticas con la misma sombra
- * (el "SaaS card kit" que delata una página genérica). Es una sola franja
- * con divisores internos y un acento de color solo donde aporta
- * información (el balance en rojo/verde), no decorativo en los cuatro.
- */
 export default function StatsRow({ items }: { items: StatItem[] }) {
   return (
     <motion.section

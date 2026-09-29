@@ -1,39 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-/**
- * Cliente por request, atado a las cookies de sesión de la psicóloga
- * autenticada. Respeta Row Level Security: solo ve sus propios datos.
- */
-export function getSupabaseServerClient() {
+export function getSupabaseServerClient(): SupabaseClient<any> {
   const cookieStore = cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name) => cookieStore.get(name)?.value,
-        set: (name, value, options) => {
+        get: (name: string) => cookieStore.get(name)?.value,
+        set: (name: string, value: string, options: any) => {
           cookieStore.set({ name, value, ...options });
         },
-        remove: (name, options) => {
+        remove: (name: string, options: any) => {
           cookieStore.set({ name, value: "", ...options });
         },
       },
     }
-  );
+  ) as SupabaseClient<any>;
 }
 
-/**
- * Patrón Singleton (a nivel de módulo del servidor): cliente con Service
- * Role, usado SOLO por rutas de servidor sin sesión de usuario (confirmar
- * cita por token público, guardar encuesta post-sesión, cron de
- * recordatorios). Nunca se importa en código de cliente.
- */
-let adminClient: ReturnType<typeof createClient> | null = null;
+let adminClient: SupabaseClient<any> | null = null;
 
-export function getSupabaseAdminClient() {
+export function getSupabaseAdminClient(): SupabaseClient<any> {
   if (!adminClient) {
     adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

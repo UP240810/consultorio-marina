@@ -15,7 +15,7 @@ export default function SurveyForm({ token, patientName }: { token: string; pati
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const totalSteps = SURVEY_QUESTIONS.length + 2; // + escala + riesgo
+  const totalSteps = SURVEY_QUESTIONS.length + 2; 
   const currentQuestion = SURVEY_QUESTIONS[step];
   const variants = stepVariants(1);
 

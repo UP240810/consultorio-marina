@@ -1,8 +1,8 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { DocumentRequest, DocumentType } from "@/types";
 
-const PURPLE = rgb(0.30, 0.11, 0.58); // #4C1D95
-const LILAC = rgb(0.545, 0.361, 0.965); // #8B5CF6
+const PURPLE = rgb(0.30, 0.11, 0.58); 
+const LILAC = rgb(0.545, 0.361, 0.965); 
 const INK = rgb(0.18, 0.16, 0.24);
 const GREY = rgb(0.45, 0.45, 0.5);
 
@@ -29,7 +29,6 @@ function formatDateEs(iso: string): string {
   return `${d} de ${meses[m - 1]} de ${y}`;
 }
 
-/** Cuerpo del documento en párrafos, según el tipo. Base del "Factory Method". */
 function buildBodyParagraphs(req: DocumentRequest): string[] {
   const age = req.patient_age ? `, de ${req.patient_age} años,` : ",";
   const single = !req.period_end || req.period_end === req.period_start;
@@ -88,14 +87,9 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
   return lines;
 }
 
-/**
- * Factory Method: `generate` construye el PDF final combinando membrete +
- * título + cuerpo según `document_type`, con el mismo acabado visual para
- * los tres tipos de documento.
- */
 export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([612, 792]); // carta
+  const page = pdfDoc.addPage([612, 792]); 
   const { width, height } = page.getSize();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -104,7 +98,7 @@ export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Ar
   const marginX = 64;
   let y = height - 60;
 
-  // --- Membrete ---
+  
   page.drawCircle({ x: marginX + 20, y: y - 12, size: 22, color: LILAC });
   page.drawText("\u03A8", {
     x: marginX + 12,
@@ -140,7 +134,7 @@ export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Ar
     color: PURPLE,
   });
 
-  // --- Título ---
+  
   y -= 40;
   const title = TITLES[req.document_type];
   const titleSize = 16;
@@ -158,7 +152,7 @@ export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Ar
   const subWidth = font.widthOfTextAtSize(sub, 10);
   page.drawText(sub, { x: (width - subWidth) / 2, y, size: 10, font, color: GREY });
 
-  // --- Cuerpo ---
+  
   y -= 40;
   const bodySize = 11;
   const maxWidth = width - marginX * 2;
@@ -171,7 +165,7 @@ export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Ar
     y -= bodySize * 0.8;
   }
 
-  // --- Cierre y firma ---
+  
   y -= 30;
   page.drawText("Atentamente", { x: marginX, y, size: 11, font: bold, color: INK });
 
@@ -188,7 +182,7 @@ export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Ar
     color: INK,
   });
 
-  // Línea y datos de firma
+  
   const signY = 150;
   page.drawLine({
     start: { x: width / 2 - 110, y: signY },
@@ -222,7 +216,7 @@ export async function generateDocumentPdf(req: DocumentRequest): Promise<Uint8Ar
     color: GREY,
   });
 
-  // --- Pie de página ---
+  
   const footer1 = "Documento de carácter confidencial. Válido únicamente para los fines señalados.";
   const footer1W = boldItalic.widthOfTextAtSize(footer1, 8.5);
   page.drawText(footer1, {

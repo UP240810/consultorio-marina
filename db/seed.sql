@@ -1,7 +1,3 @@
--- Datos de ejemplo opcionales para probar la app en desarrollo.
--- Ejecutar en el SQL Editor de Supabase DESPUÉS de crear tu usuario
--- (auth.users) y de correr schema.sql. Sustituye '<TU_USER_ID>' por el
--- UUID de tu usuario (Authentication > Users en el dashboard de Supabase).
 
 insert into profiles (id, full_name, professional_license, masters_license, specialty)
 values ('<TU_USER_ID>', 'Marina Velázquez Tristán', '13619201', '9718535',
