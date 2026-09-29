@@ -1,0 +1,133 @@
+@startuml database-diagram
+title Consultorio Marina Velázquez Tristán — Diagrama Entidad-Relación (Supabase/Postgres)
+skinparam backgroundColor #FFFFFF
+skinparam linetype ortho
+hide circle
+skinparam class {
+  BackgroundColor #F5F3FF
+  BorderColor #6D28D9
+  ArrowColor #6D28D9
+  FontColor #2E1065
+}
+
+entity "auth.users\n(Supabase Auth)" as auth_users {
+  * id : uuid <<PK>>
+  --
+  email : text
+}
+
+entity "profiles" as profiles {
+  * id : uuid <<PK, FK -> auth.users>>
+  --
+  full_name : text
+  professional_license : text
+  masters_license : text
+  specialty : text
+  created_at : timestamptz
+}
+
+entity "patients" as patients {
+  * id : uuid <<PK>>
+  --
+  doctor_id : uuid <<FK -> auth.users>>
+  full_name : text
+  birth_date : date
+  occupation : text
+  phone : text
+  emergency_contact_name : text
+  emergency_contact_phone : text
+  current_medication : text
+  status : text
+  intake_notes : text
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+entity "appointments" as appointments {
+  * id : uuid <<PK>>
+  --
+  doctor_id : uuid <<FK -> auth.users>>
+  patient_id : uuid <<FK -> patients>>
+  scheduled_at : timestamptz
+  duration_minutes : int
+  status : text
+  confirm_token : uuid <<unique>>
+  confirmed_at : timestamptz
+  reminder_sent_at : timestamptz
+  price : numeric
+  created_at : timestamptz
+}
+
+entity "session_notes" as session_notes {
+  * id : uuid <<PK>>
+  --
+  appointment_id : uuid <<FK -> appointments>>
+  patient_id : uuid <<FK -> patients>>
+  doctor_id : uuid <<FK -> auth.users>>
+  content : text
+  created_at : timestamptz
+}
+
+entity "session_surveys" as session_surveys {
+  * id : uuid <<PK>>
+  --
+  appointment_id : uuid <<FK -> appointments>>
+  patient_id : uuid <<FK -> patients>>
+  doctor_id : uuid <<FK -> auth.users>>
+  mood_answers : jsonb
+  discharge_readiness : smallint [1-10]
+  risk_factor : boolean
+  risk_factor_detail : text
+  emergency_contact_notified : boolean
+  created_at : timestamptz
+}
+
+entity "finance_entries" as finance_entries {
+  * id : uuid <<PK>>
+  --
+  doctor_id : uuid <<FK -> auth.users>>
+  kind : text
+  concept : text
+  amount : numeric
+  appointment_id : uuid <<FK -> appointments, nullable>>
+  entry_date : date
+  created_at : timestamptz
+}
+
+entity "issued_documents" as issued_documents {
+  * id : uuid <<PK>>
+  --
+  doctor_id : uuid <<FK -> auth.users>>
+  patient_id : uuid <<FK -> patients>>
+  document_type : text
+  period_start : date
+  period_end : date
+  diagnosis_text : text
+  custom_reason : text
+  file_path : text
+  created_at : timestamptz
+}
+
+entity "reminder_logs" as reminder_logs {
+  * id : uuid <<PK>>
+  --
+  appointment_id : uuid <<FK -> appointments>>
+  channel : text
+  status : text
+  detail : text
+  sent_at : timestamptz
+}
+
+auth_users ||--o| profiles : "es"
+auth_users ||--o{ patients : "atiende"
+auth_users ||--o{ appointments : "agenda"
+patients ||--o{ appointments : "tiene"
+appointments ||--o| session_notes : "genera"
+appointments ||--o| session_surveys : "genera"
+appointments ||--o{ reminder_logs : "notifica"
+appointments |o--o{ finance_entries : "produce"
+patients ||--o{ session_notes : "acumula"
+patients ||--o{ session_surveys : "acumula"
+patients ||--o{ issued_documents : "recibe"
+
+@enduml

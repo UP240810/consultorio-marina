@@ -1,0 +1,169 @@
+@startuml class-diagram
+title Consultorio Marina Velázquez Tristán — Diagrama de Clases (POO)
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam class {
+  BackgroundColor #F5F3FF
+  BorderColor #6D28D9
+  ArrowColor #6D28D9
+  FontColor #2E1065
+}
+
+abstract class Entity {
+  +id: UUID
+  +createdAt: DateTime
+}
+
+class Doctor {
+  +fullName: string
+  +professionalLicense: string
+  +mastersLicense: string
+  +specialty: string
+}
+
+class Patient {
+  +fullName: string
+  +birthDate: Date
+  +occupation: string
+  +phone: string
+  +emergencyContactName: string
+  +emergencyContactPhone: string
+  +currentMedication: string
+  +status: PatientStatus
+  +age(): number
+  +isActive(): boolean
+}
+
+enum PatientStatus {
+  ACTIVO
+  DE_ALTA
+  PAUSADO
+}
+
+class Appointment {
+  +scheduledAt: DateTime
+  +durationMinutes: int
+  +status: AppointmentStatus
+  +confirmToken: UUID
+  +price: Decimal
+  +confirm(): void
+  +cancel(): void
+  +markCompleted(): void
+  +isWithinBusinessHours(): boolean
+}
+
+enum AppointmentStatus {
+  AGENDADA
+  CONFIRMADA
+  CANCELADA
+  COMPLETADA
+  NO_ASISTIO
+}
+
+class SessionNote {
+  +content: string
+  +edit(newContent: string): void
+}
+
+class SessionSurvey {
+  +moodAnswers: Map<string, string>
+  +dischargeReadiness: int <<1..10>>
+  +riskFactor: boolean
+  +riskFactorDetail: string
+  +emergencyContactNotified: boolean
+  +flagRisk(detail: string): void
+  +notifyEmergencyContactIfNeeded(): void
+}
+
+class FinanceEntry {
+  +kind: FinanceKind
+  +concept: string
+  +amount: Decimal
+  +entryDate: Date
+}
+
+enum FinanceKind {
+  INGRESO
+  GASTO
+}
+
+class IssuedDocument {
+  +documentType: DocumentType
+  +periodStart: Date
+  +periodEnd: Date
+  +diagnosisText: string
+  +customReason: string
+  +filePath: string
+  +generate(): Buffer
+}
+
+enum DocumentType {
+  JUSTIFICANTE
+  CONSTANCIA
+  PERMISO_ESCOLAR
+}
+
+class ReminderLog {
+  +channel: string
+  +status: string
+  +detail: string
+  +sentAt: DateTime
+}
+
+' --- Servicios / capa de aplicación (no son entidades de BD) ---
+class AppointmentScheduler {
+  +findAvailableSlots(date: Date): Slot[]
+  +book(patientId: UUID, slot: Slot): Appointment
+  +sendDailyReminders(): void
+}
+
+class SurveyService {
+  +submit(appointmentId: UUID, answers): SessionSurvey
+  -checkRiskAndAlert(survey: SessionSurvey): void
+}
+
+class DocumentGenerator {
+  +generate(request: DocumentRequest): IssuedDocument
+}
+
+class NotificationService {
+  +send(channel: string, to: string, message: string): void
+}
+
+class StatisticsService {
+  +monthlyIncome(): Decimal
+  +monthlyExpenses(): Decimal
+  +balance(): Decimal
+  +appointmentsPerWeek(): Report
+}
+
+Entity <|-- Doctor
+Entity <|-- Patient
+Entity <|-- Appointment
+Entity <|-- SessionNote
+Entity <|-- SessionSurvey
+Entity <|-- FinanceEntry
+Entity <|-- IssuedDocument
+Entity <|-- ReminderLog
+
+Doctor "1" --> "*" Patient : atiende
+Patient "1" --> "*" Appointment : agenda
+Patient "1" --> "*" IssuedDocument : recibe
+Appointment "1" --> "0..1" SessionNote : genera
+Appointment "1" --> "0..1" SessionSurvey : genera
+Appointment "0..1" --> "*" ReminderLog : registra
+Appointment "0..1" --> "0..1" FinanceEntry : produce
+Patient *-- PatientStatus
+Appointment *-- AppointmentStatus
+FinanceEntry *-- FinanceKind
+IssuedDocument *-- DocumentType
+
+AppointmentScheduler ..> Appointment : crea/consulta
+AppointmentScheduler ..> NotificationService : usa
+SurveyService ..> SessionSurvey : crea
+SurveyService ..> NotificationService : usa (alerta de riesgo)
+DocumentGenerator ..> IssuedDocument : crea
+StatisticsService ..> FinanceEntry : consulta
+StatisticsService ..> Appointment : consulta
+
+@enduml

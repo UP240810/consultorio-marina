@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.psi-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  color: white;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.btn-primary {
+  @apply bg-violet text-white rounded-card px-4 py-2 font-medium hover:bg-plum transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-white border border-lilac/40 text-plum rounded-card px-4 py-2 font-medium hover:bg-mist transition-colors;
+}
+
+.input-field {
+  @apply w-full rounded-card border border-lilac/30 bg-white px-3 py-2 text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-lilac;
+}
+
+.field-label {
+  @apply block text-sm font-medium text-plum mb-1;
+}
+
+.card {
+  @apply bg-white border border-lilac/15 rounded-card shadow-sm;
+}

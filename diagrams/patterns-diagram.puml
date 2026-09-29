@@ -1,0 +1,99 @@
+@startuml patterns-diagram
+title Consultorio Marina Velázquez Tristán — Patrones de Diseño Aplicados
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #F5F3FF
+  BorderColor #6D28D9
+  ArrowColor #6D28D9
+  FontColor #2E1065
+}
+
+package "1. Singleton — src/lib/supabase" {
+  class SupabaseServerClient {
+    - {static} instance: SupabaseClient
+    + {static} getInstance(): SupabaseClient
+  }
+  note right of SupabaseServerClient
+    Una sola conexión/configuración de Supabase
+    reutilizada en toda la app (evita recrear
+    el cliente en cada request).
+  end note
+}
+
+package "2. Repository — src/lib/repositories" {
+  interface PatientRepository {
+    + findAll(): Patient[]
+    + findById(id): Patient
+    + create(data): Patient
+    + update(id, data): Patient
+  }
+  class SupabasePatientRepository implements PatientRepository
+  note right of SupabasePatientRepository
+    Aísla el acceso a datos de Supabase del
+    resto de la aplicación. Facilita pruebas
+    y un futuro cambio de proveedor de BD.
+  end note
+}
+
+package "3. Factory Method — src/lib/pdf" {
+  abstract class DocumentTemplate {
+    + {abstract} render(data): PDFBuffer
+  }
+  class JustificanteTemplate extends DocumentTemplate
+  class ConstanciaTemplate extends DocumentTemplate
+  class PermisoEscolarTemplate extends DocumentTemplate
+  class DocumentTemplateFactory {
+    + {static} create(type: DocumentType): DocumentTemplate
+  }
+  DocumentTemplateFactory ..> DocumentTemplate : crea
+  DocumentTemplateFactory ..> JustificanteTemplate
+  DocumentTemplateFactory ..> ConstanciaTemplate
+  DocumentTemplateFactory ..> PermisoEscolarTemplate
+  note bottom of DocumentTemplateFactory
+    Cada tipo de PDF (justificante, constancia,
+    permiso escolar) es intercambiable sin tocar
+    el código que solicita el documento.
+  end note
+}
+
+package "4. Strategy — src/lib/patterns/NotificationStrategy" {
+  interface NotificationChannel {
+    + send(to, message): void
+  }
+  class EmailChannel implements NotificationChannel
+  class WhatsAppChannel implements NotificationChannel
+  class NotificationService {
+    - channel: NotificationChannel
+    + setChannel(c: NotificationChannel): void
+    + notify(to, message): void
+  }
+  NotificationService o--> NotificationChannel
+  note right of NotificationService
+    El recordatorio diario y la alerta de riesgo
+    usan la misma interfaz sin importar el canal
+    (correo hoy, WhatsApp/SMS mañana).
+  end note
+}
+
+package "5. Observer — src/lib/patterns/SurveyObserver" {
+  interface SurveyObserver {
+    + onSurveySubmitted(survey): void
+  }
+  class RiskAlertObserver implements SurveyObserver
+  class StatisticsObserver implements SurveyObserver
+  class SurveyService {
+    - observers: SurveyObserver[]
+    + subscribe(o: SurveyObserver): void
+    + submit(answers): void
+  }
+  SurveyService o--> "*" SurveyObserver
+  note bottom of RiskAlertObserver
+    Si discharge_readiness/risk_factor indican
+    riesgo, este observador dispara la notificación
+    al contacto de emergencia sin acoplar esa
+    lógica al formulario de encuesta.
+  end note
+}
+
+@enduml
