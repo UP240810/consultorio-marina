@@ -4,12 +4,17 @@ import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
 import { MotionConfig } from "framer-motion";
 
+// Variable font: no pasar array de weights (evita el bug de next/font con URLs sin extensión de Google Fonts)
 const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
-  weight: ["500", "600", "700"],
+  display: "swap",
 });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Consultorio · Marina Velázquez Tristán",
